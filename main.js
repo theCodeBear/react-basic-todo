@@ -1,18 +1,17 @@
 var TodoApp = React.createClass({
   getInitialState: function() {
-    return { items: [] };
+    return { items: [], id: 0 };
   },
 
   addItem: function(item) {
-    this.setState({ items: this.state.items.concat(item) });
-    console.log(this.state.items);
+    this.setState({ items: this.state.items.concat({data:item, id:this.state.id}), id: this.state.id+1 });
   },
 
   render: function() {
     return (
       <div>
         <SubmissionForm addItem={this.addItem} />
-        <List className='redBorder' />
+        <List list={this.state.items} />
       </div>
     );
   }
@@ -23,28 +22,31 @@ var SubmissionForm = React.createClass({
     return { item: '' };
   },
 
-  addItem: function() {
-    this.props.addItem(this.state.item);
+  addItem: function(e) {
+    e.preventDefault();
+    var input = React.findDOMNode(this.refs.newItem);
+    this.props.addItem(input.value);
+    input.value = '';
+    input.focus();
   },
 
   render: function() {
     var item = this.state.item;
     return (
-      <div>
-        <input type='text' value={item} placeholder='Item to add to list' />
-        <button type='button' onClick={this.addItem}>+</button>
-      </div>
+      <form onSubmit={this.addItem}>
+        <input type='text'
+               placeholder='Item to add to list'
+               ref='newItem'
+               autoFocus />
+        <button type='submit'>+</button>
+      </form>
     );
   }
 });
 
 var List = React.createClass({
-  getInitialState: function() {
-    return { list: [{data: 'get groceries', id: 1}, {data: 'do laundry', id: 2}] };
-  },
-
   render: function() {
-    var items = this.state.list.map(function(item) {
+    var items = this.props.list.map(function(item) {
       return <ListItem key={item.id} data={item.data} />
     });
     return (
